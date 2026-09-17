@@ -25,6 +25,8 @@ export async function POST(request: Request) {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "Origin": "https://ubiquitous-donut-f70147.netlify.app",
+          "Referer": "https://ubiquitous-donut-f70147.netlify.app/",
         },
         body: JSON.stringify({
           access_key: accessKey,
