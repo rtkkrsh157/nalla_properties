@@ -38,11 +38,12 @@ export default function Page() {
     setStatus("Sending...");
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const form = event.currentTarget;
+      const formData = new FormData(form);
 
       const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
-      console.log("Access key exists:", !!accessKey);
+      console.log("Web3Forms key exists:", !!accessKey);
 
       if (!accessKey) {
         throw new Error("Web3Forms access key is missing");
@@ -51,9 +52,15 @@ export default function Page() {
       formData.append("access_key", accessKey);
       formData.append("subject", "New Enquiry - Nalla Properties");
 
+      const object = Object.fromEntries(formData.entries());
+
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(object),
       });
 
       console.log("Web3Forms HTTP status:", response.status);
@@ -64,7 +71,7 @@ export default function Page() {
 
       if (data.success) {
         setStatus("Message sent successfully!");
-        event.currentTarget.reset();
+        form.reset();
       } else {
         setStatus(data.message || "Failed to send message.");
       }
