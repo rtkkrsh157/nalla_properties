@@ -41,33 +41,20 @@ export default function Page() {
       const form = event.currentTarget;
       const formData = new FormData(form);
 
-      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-
-      console.log("Web3Forms key exists:", !!accessKey);
-
-      if (!accessKey) {
-        throw new Error("Web3Forms access key is missing");
-      }
-
-      formData.append("access_key", accessKey);
-      formData.append("subject", "New Enquiry - Nalla Properties");
-
       const object = Object.fromEntries(formData.entries());
 
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         body: JSON.stringify(object),
       });
 
-      console.log("Web3Forms HTTP status:", response.status);
-
       const data = await response.json();
 
-      console.log("Web3Forms response:", data);
+      console.log("Contact API status:", response.status);
+      console.log("Contact API response:", data);
 
       if (data.success) {
         setStatus("Message sent successfully!");
@@ -76,7 +63,7 @@ export default function Page() {
         setStatus(data.message || "Failed to send message.");
       }
     } catch (error) {
-      console.error("Web3Forms error:", error);
+      console.error("Contact form error:", error);
       setStatus("Something went wrong. Please try again.");
     }
   };
