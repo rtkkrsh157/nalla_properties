@@ -32,13 +32,13 @@ export async function POST(request: Request) {
     return NextResponse.json(data, {
       status: response.status,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Web3Forms API error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Unable to send enquiry.",
+        message: "Unable to send enquiry. Error: " + (error?.message || String(error)),
       },
       { status: 500 }
     );
