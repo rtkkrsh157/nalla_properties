@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", // Bypasses some bot protections
       },
       body: JSON.stringify({
         access_key: accessKey,
@@ -27,7 +28,15 @@ export async function POST(request: Request) {
       }),
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Web3Forms returned non-JSON:", responseText);
+      throw new Error(`Web3Forms returned HTML (Status ${response.status}). First 100 chars: ${responseText.substring(0, 100)}`);
+    }
 
     return NextResponse.json(data, {
       status: response.status,
