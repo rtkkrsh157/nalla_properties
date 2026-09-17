@@ -30,32 +30,47 @@ const process = [
 
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [status, setStatus] = useState<'' | 'submitting' | 'success' | 'error'>('')
+  const [status, setStatus] = useState("")
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setStatus('submitting');
-    const formData = new FormData(event.currentTarget);
-    formData.append("access_key", process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY as string);
+
+    setStatus("Sending...");
 
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const formData = new FormData(event.currentTarget);
+
+      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+      console.log("Access key exists:", !!accessKey);
+
+      if (!accessKey) {
+        throw new Error("Web3Forms access key is missing");
+      }
+
+      formData.append("access_key", accessKey);
+      formData.append("subject", "New Enquiry - Nalla Properties");
+
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-        body: JSON.stringify(Object.fromEntries(formData))
+        body: formData,
       });
-      const result = await res.json();
-      if (result.success) {
-        setStatus('success');
-        (event.target as HTMLFormElement).reset();
+
+      console.log("Web3Forms HTTP status:", response.status);
+
+      const data = await response.json();
+
+      console.log("Web3Forms response:", data);
+
+      if (data.success) {
+        setStatus("Message sent successfully!");
+        event.currentTarget.reset();
       } else {
-        setStatus('error');
+        setStatus(data.message || "Failed to send message.");
       }
     } catch (error) {
-      setStatus('error');
+      console.error("Web3Forms error:", error);
+      setStatus("Something went wrong. Please try again.");
     }
   };
 
@@ -93,7 +108,7 @@ export default function Page() {
 
       <section id="process" className="process section-shell"><div className="section-label">04 / Our approach</div><div className="process-heading"><h2>Simple, transparent,<br /><i>dependable.</i></h2><p>No jargon. No chasing. Just a thoughtful process and a team that does what it says.</p></div><div className="process-grid">{process.map(([number, title, description]) => <div className="process-step" key={number}><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div></div>)}</div></section>
 
-      <section id="contact" className="contact section-shell"><div className="contact-panel"><div><p className="eyebrow"><span /> Let’s look after it together</p><h2>Your Property<br /><i>Our Responsibility.</i></h2><p className="contact-note">Tell us a little about your property and what you need. We&apos;ll get back to you with a clear next step.</p><div className="contact-details"><a href="tel:+919443301698"><Phone size={17} /> +91 94433 01698</a><a href="mailto:namopublishers@gmail.com"><Mail size={17} /> namopublishers@gmail.com</a></div></div><form className="contact-form" onSubmit={handleSubmit}><label>Your name<input name="name" placeholder="Enter your name" required disabled={status === 'submitting' || status === 'success'} /></label><label>Phone number or email<input name="contact" placeholder="Your preferred contact details" required disabled={status === 'submitting' || status === 'success'} /></label><label>Service required<select name="service" defaultValue="" disabled={status === 'submitting' || status === 'success'}><option value="" disabled>Select a service</option>{services.map(([number, title]) => <option value={title} key={number}>{title}</option>)}</select></label><label>How can we help?<textarea name="message" placeholder="Tell us about your property..." rows={3} disabled={status === 'submitting' || status === 'success'} /></label><button className="button button-dark" type="submit" disabled={status === 'submitting' || status === 'success'}>{status === 'submitting' ? 'Sending...' : status === 'success' ? 'Enquiry sent ✓' : 'Send an enquiry'} {status !== 'submitting' && status !== 'success' && <ArrowUpRight size={17} />}</button>{status === 'error' && <p style={{ color: 'var(--rust)', fontSize: '13px', marginTop: '5px' }}>Something went wrong. Please try again or contact us directly.</p>}</form></div></section>
+      <section id="contact" className="contact section-shell"><div className="contact-panel"><div><p className="eyebrow"><span /> Let’s look after it together</p><h2>Your Property<br /><i>Our Responsibility.</i></h2><p className="contact-note">Tell us a little about your property and what you need. We'll get back to you with a clear next step.</p><div className="contact-details"><a href="tel:+919443301698"><Phone size={17} /> +91 94433 01698</a><a href="mailto:namopublishers@gmail.com"><Mail size={17} /> namopublishers@gmail.com</a></div></div><form className="contact-form" onSubmit={handleSubmit}><label>Your name<input name="name" placeholder="Enter your name" required disabled={status === 'Sending...'} /></label><label>Phone number or email<input name="contact" placeholder="Your preferred contact details" required disabled={status === 'Sending...'} /></label><label>Service required<select name="service" defaultValue="" disabled={status === 'Sending...'}><option value="" disabled>Select a service</option>{services.map(([number, title]) => <option value={title} key={number}>{title}</option>)}</select></label><label>How can we help?<textarea name="message" placeholder="Tell us about your property..." rows={3} disabled={status === 'Sending...'} /></label><button className="button button-dark" type="submit" disabled={status === 'Sending...'}>{status === 'Sending...' ? 'Sending...' : 'Send an enquiry'} {status !== 'Sending...' && <ArrowUpRight size={17} />}</button>{status && status !== 'Sending...' && <p style={{ color: status.includes('success') ? 'green' : 'var(--rust)', fontSize: '13px', marginTop: '5px' }}>{status}</p>}</form></div></section>
 
       <footer className="footer"><div className="section-shell footer-grid"><div><a className="brand brand-light" href="#top"><span className="brand-mark">N</span><span>Nalla <em>Properties</em></span></a><p>Property care, made personal.<br />Coimbatore, India.<br />Trusted property care in Coimbatore, for owners near and far.</p></div><div className="footer-links"><a href="#about">About</a><a href="#services">Services</a><a href="#process">Our approach</a><a href="#contact">Contact</a></div><div className="footer-contact"><span>Start a conversation</span><a href="mailto:namopublishers@gmail.com">namopublishers@gmail.com</a><a href="tel:+919443301698">+91 94433 01698</a></div></div><div className="section-shell footer-bottom"><span>© 2024 Nalla Properties</span><span>Made with care in Coimbatore</span></div></footer>
     </main>
